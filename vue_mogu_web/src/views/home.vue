@@ -26,7 +26,7 @@
 
       <ul id="starlist" :style="showHead?'display: block':''">
 
-        <li v-for="webNavbar in webNavbarList">
+        <li v-for="webNavbar in webNavbarList" :key="webNavbar.uid">
 
           <!--判断是否有下拉菜单-->
           <span  v-if="webNavbar.childWebNavbar && webNavbar.childWebNavbar.length > 0">
@@ -120,7 +120,7 @@
             v-model="keyword"
             v-on:keyup.enter="search"
           >
-          <p class="search_ico" @click="clickSearchIco">
+          <p class="search_ico" @click="clickSearchIco" :style="(browserFlag == 1)?'':'top:17px'">
             <span></span>
           </p>
         </div>
@@ -320,7 +320,6 @@
             <div>或者加入我们的QQ群进行交流</div>
           </el-collapse-item>
         </el-collapse>
-
         <el-divider></el-divider>
 
         <div style="width: 100%; height: 450px;overflow:auto">
@@ -400,17 +399,8 @@
 
         <el-form label-position="left" :model="blogLink" label-width="100px" ref="blogLink" :rules="linkRules">
           <el-collapse v-model="activeNames">
-            <el-collapse-item title="申请须知" name="1">
-              <div>请确定贵站可以稳定运营</div>
-              <div>原创博客优先，技术类博客优先</div>
-              <div>申请前请先添加下方{{info.name}}友链</div>
-              <div>欢迎各位小伙伴一起互换友链~</div>
-            </el-collapse-item>
-            <el-collapse-item :title="info.name" name="2">
-              <div>网站名称：{{info.name}}</div>
-              <div>网站LOGO：<a :href="info.logoPhoto" target="_blank">点击查看</a></div>
-              <div>网站简介：{{info.title}}</div>
-              <div>网站地址：{{webSite}}</div>
+            <el-collapse-item title="友链申请需知" name="1">
+              <span v-html="info.linkApplyTemplate">{{info.linkApplyTemplate}}</span>
             </el-collapse-item>
           </el-collapse>
 
@@ -539,7 +529,7 @@
             span: ['class']
           }
         },
-        activeNames: ['1', '2'], //激活的折叠面板
+        activeNames: ['1'], //激活的折叠面板
         activeName: "0", // 激活的标签
         yesNoDictList: [], // 是否 字典列表
         genderDictList: [], //性别 字典列表
@@ -573,6 +563,7 @@
         defaultAvatar: this.$SysConf.defaultAvatar, // 默认头像
         drawerSize: "30%",
         userReceiveCommentCount: 0, // 用户收到的评论数
+        browserFlag: 1, // 浏览器标志【默认Chrome】
         rules: {
           qqNumber: [
             {pattern:  /[1-9]([0-9]{5,11})/, message: '请输入正确的QQ号码'},
@@ -663,6 +654,8 @@
       this.getWebNavbarList()
       this.setSize()
       this.setUserReceiveCommentCount()
+      // 获取浏览器类型
+      this.getBrowser()
     },
     methods: {
       //拿到vuex中的写的方法
@@ -1160,7 +1153,21 @@
       },
       closeLoginBox: function () {
         this.showLogin = false;
-      }
+      },
+      // 获取浏览器类型
+      getBrowser() {
+        let sBrowser, sUsrAg = navigator.userAgent;
+        if (sUsrAg.indexOf("Firefox") > -1) {
+          sBrowser = "Mozilla Firefox";
+          this.browserFlag = 2;
+          // "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
+        } else if (sUsrAg.indexOf("Chrome") > -1) {
+          sBrowser = "Google Chrome or Chromium";
+          this.browserFlag = 1;
+          // "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181 Chrome/66.0.3359.181 Safari/537.36"
+        }
+
+      },
     }
   };
 </script>
@@ -1326,4 +1333,6 @@
     width: 240px;
     margin-bottom: 5px;
   }
+
+  .search_ico2 { width: 60px; height: 60px; display: block; position: absolute; right: 0; top: 15px; padding: 0; margin: 0; line-height: 60px; cursor: pointer; }
 </style>

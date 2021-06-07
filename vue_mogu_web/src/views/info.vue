@@ -67,7 +67,7 @@
       </div>
 
       <!--付款码和点赞-->
-      <PayCode v-if="openAdmiration == '1'" :blogUid="blogUid" :praiseCount="blogData.collectCount"></PayCode>
+      <PayCode v-if="openAdmiration == '1'" :blogUid="blogUid" :praiseCount.sync="blogData.collectCount"></PayCode>
 
       <div class="otherlink" v-if="sameBlogData.length > 0">
         <h2>相关文章</h2>
@@ -435,7 +435,6 @@
     height: 190px;
     position: absolute;
     z-index: 999;
-    left: 35px;
     top: 10px;
   }
   .emoji-size-small {

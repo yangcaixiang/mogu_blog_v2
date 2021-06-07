@@ -31,6 +31,11 @@
             <el-radio v-for="item in openDictList" :key="item.uid" v-model="form.openDashboardNotification" :label="item.dictValue" border size="medium">{{item.dictLabel}}</el-radio>
           </el-form-item>
 
+          <!-- 仪表盘弹框通知，在用户登录后台的时候会出现，可以手动关闭 -->
+          <el-form-item label="注册用户邮件激活">
+            <el-radio v-for="item in openDictList" :key="item.uid" v-model="form.openEmailActivate" :label="item.dictValue" border size="medium">{{item.dictLabel}}</el-radio>
+          </el-form-item>
+
           <el-form-item>
             <el-button type="primary" @click="submitForm()" v-permission="'/systemConfig/editSystemConfig'">保 存</el-button>
           </el-form-item>
@@ -295,7 +300,7 @@
         <span slot="label"><i class="el-icon-edit"></i> 仪表盘通知</span>
         <div class="editor-container">
           <CKEditor ref="editor" v-if="form.editorModel == '0'" :content="form.dashboardNotification" :height="500"></CKEditor>
-          <MarkdownEditor ref="editor" v-if="form.editorModel == '1'" :height="660"></MarkdownEditor>
+          <MarkdownEditor ref="editor" v-if="form.editorModel == '1'" :height="660" style="margin-top: 12px"></MarkdownEditor>
         </div>
         <div style="margin-top: 5px; margin-left: 10px;" >
           <el-button type="primary" @click="submitForm()" v-permission="'/system/editMe'">保 存</el-button>

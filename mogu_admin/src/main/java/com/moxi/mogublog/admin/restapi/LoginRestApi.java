@@ -19,6 +19,7 @@ import com.moxi.mogublog.xo.service.RoleService;
 import com.moxi.mogublog.xo.service.WebConfigService;
 import com.moxi.mogublog.xo.utils.WebUtil;
 import com.moxi.mougblog.base.enums.EMenuType;
+import com.moxi.mougblog.base.enums.EStatus;
 import com.moxi.mougblog.base.global.Constants;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -102,6 +104,8 @@ public class LoginRestApi {
         } else {
             queryWrapper.eq(SQLConf.USER_NAME, username);
         }
+        queryWrapper.last(SysConf.LIMIT_ONE);
+        queryWrapper.eq(SysConf.STATUS, EStatus.ENABLE);
         Admin admin = adminService.getOne(queryWrapper);
         if (admin == null) {
             // 设置错误登录次数
@@ -193,16 +197,11 @@ public class LoginRestApi {
         List<String> roleUid = new ArrayList<>();
         roleUid.add(admin.getRoleUid());
         Collection<Role> roleList = roleService.listByIds(roleUid);
-
         List<String> categoryMenuUids = new ArrayList<>();
-
         roleList.forEach(item -> {
             String caetgoryMenuUids = item.getCategoryMenuUids();
             String[] uids = caetgoryMenuUids.replace("[", "").replace("]", "").replace("\"", "").split(",");
-            for (int a = 0; a < uids.length; a++) {
-                categoryMenuUids.add(uids[a]);
-            }
-
+            categoryMenuUids.addAll(Arrays.asList(uids));
         });
         categoryMenuList = categoryMenuService.listByIds(categoryMenuUids);
 
@@ -282,6 +281,7 @@ public class LoginRestApi {
             }
             // 移除Redis中的用户
             redisUtil.delete(RedisConf.LOGIN_TOKEN_KEY + RedisConf.SEGMENTATION + token);
+            SecurityContextHolder.clearContext();
             return ResultUtil.result(SysConf.SUCCESS, MessageConf.OPERATION_SUCCESS);
         }
     }
@@ -302,7 +302,7 @@ public class LoginRestApi {
             redisUtil.setEx(RedisConf.LOGIN_LIMIT + RedisConf.SEGMENTATION + ip, String.valueOf(countTemp), 10, TimeUnit.MINUTES);
         } else {
             surplusCount = surplusCount - 1;
-            redisUtil.setEx(RedisConf.LOGIN_LIMIT + RedisConf.SEGMENTATION + ip, "1", 30, TimeUnit.MINUTES);
+            redisUtil.setEx(RedisConf.LOGIN_LIMIT + RedisConf.SEGMENTATION + ip, Constants.STR_ONE, 30, TimeUnit.MINUTES);
         }
         return surplusCount;
     }
